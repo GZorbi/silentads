@@ -26,5 +26,67 @@
 
     <h2>4. Contact Us</h2>
     <p>If you have any questions regarding this Privacy Policy, you can contact us through our official GitHub profile channels.</p>
+    <!-- SilentAds Premium Activation Bridge -->
+<script>
+  (function () {
+    'use strict';
+    
+    // Check if the landing page was loaded as a successful checkout redirect
+    if (window.location.search.includes('success=true')) {
+      
+      // 1. Dispatch custom event to notify the SilentAds content script bridge
+      document.dispatchEvent(new CustomEvent('SilentAds_ActivatePremium'));
+      
+      // Listen for confirmation back from the content script bridge
+      document.addEventListener('SilentAds_ActivationConfirmed', function () {
+        showActivationSuccess();
+      });
+
+      // Also set an attribute on the root document element so styles can adapt if needed
+      document.documentElement.setAttribute('data-silentads-payment', 'success');
+
+      // 2. Fallback: Communicate via external runtime messaging
+      // Replace 'YOUR_EXTENSION_ID_HERE' with your actual Chrome Web Store extension ID
+      var EXTENSION_ID = 'YOUR_EXTENSION_ID_HERE';
+      
+      if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(
+          EXTENSION_ID,
+          { action: 'activatePremium' },
+          function (response) {
+            if (chrome.runtime.lastError) {
+              console.warn('Extension not detected or externally connectable not set:', chrome.runtime.lastError.message);
+            } else if (response && response.success) {
+              showActivationSuccess();
+            }
+          }
+        );
+      }
+    }
+
+    function showActivationSuccess() {
+      // Create or update a status indicator on the page to reassure the user
+      var statusIndicator = document.getElementById('silentads-status');
+      if (!statusIndicator) {
+        statusIndicator = document.createElement('div');
+        statusIndicator.id = 'silentads-status';
+        statusIndicator.style.position = 'fixed';
+        statusIndicator.style.bottom = '20px';
+        statusIndicator.style.right = '20px';
+        statusIndicator.style.background = 'linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%)';
+        statusIndicator.style.color = '#fff';
+        statusIndicator.style.padding = '12px 24px';
+        statusIndicator.style.borderRadius = '12px';
+        statusIndicator.style.fontFamily = 'sans-serif';
+        statusIndicator.style.fontSize = '14px';
+        statusIndicator.style.fontWeight = 'bold';
+        statusIndicator.style.boxShadow = '0 0 15px rgba(0, 240, 255, 0.4)';
+        statusIndicator.style.zIndex = '999999';
+        document.body.appendChild(statusIndicator);
+      }
+      statusIndicator.textContent = '🎉 SilentAds Premium Activated Successfully!';
+    }
+  })();
+</script>
 </body>
 </html>
